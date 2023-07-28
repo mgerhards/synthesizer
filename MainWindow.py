@@ -27,7 +27,7 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.waveform_selector)
         
         #Add a slider
-        self.slider = FrequencySlider(Qt.Orientation.Horizontal)
+        self.slider = FrequencySlider(main_window=self)
         self.layout.addWidget(self.slider) 
         
         # Add area for plotting signal with matplotlib
@@ -39,6 +39,23 @@ class MainWindow(QMainWindow):
         self.playButton.clicked.connect(self.playButtonClicked)        
         self.layout.addWidget(self.playButton)
         
+        self.setFrequency(440)
+        self.setSignal(CosSignal)
+        self.updateWaveCanvas()
+        
+    def setSignal(self, signal):
+        self._signal_func = signal
+    
+    def setFrequency(self, frequency):
+        self._frequency = frequency
+    
+    def updateWaveCanvas(self):
+        self.sc.axes.clear()
+        signal = self._signal_func(freq=self._frequency, amp=1.0, offset=0)        
+        wave = signal.make_wave(duration=1, framerate=10000)
+        self.sc.axes.plot(wave.ts[:500], wave.ys[:500])
+        self.sc.draw()
+            
         
     def playButtonClicked(self):
         pass
