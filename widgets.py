@@ -40,6 +40,7 @@ class FrequencySlider(QWidget):
         self.setMinimum(16)
         self.setMaximum(8000)
         self.setValues(16, 8000)
+        self.slider.setValue(440)
         
         # Connect the slider's valueChanged signal to the updateLabels function
         self.slider.valueChanged.connect(self.updateLabels)

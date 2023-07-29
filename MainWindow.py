@@ -1,5 +1,5 @@
 import sys
-from thinkdsp import CosSignal, SinSignal
+from thinkdsp import CosSignal, SinSignal, Audio, SquareSignal, TriangleSignal, SawtoothSignal
 
 from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QSlider
@@ -58,5 +58,11 @@ class MainWindow(QMainWindow):
             
         
     def playButtonClicked(self):
-        pass
-        
+        import wave
+        import simpleaudio as sa
+        signal = self._signal_func(freq=self._frequency, amp=1.0, offset=0)        
+        w = signal.make_wave(duration=1, framerate=44100)
+        w.write("test.wav")
+        wave_obj = sa.WaveObject.from_wave_file("test.wav")
+        play_obj = wave_obj.play()
+        play_obj.wait_done()
