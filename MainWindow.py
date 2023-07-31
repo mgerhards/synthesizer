@@ -8,10 +8,14 @@ from matplotlib.backends.backend_qtagg import (
     FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
 from matplotlib.figure import Figure
 
-
+import numpy as np
 from matplotlib.backends.qt_compat import QtWidgets
+from widgets.PianoWidget import PianoWidget
 
-from widgets import FrequencySlider, MplCanvas, WaveformSelector
+from widgets.frequency_slider import FrequencySlider
+from widgets.waveform_selector import WaveformSelector
+from widgets.mpl_canvas import MplCanvas
+from widgets.octave_widget import OctaveWidget
 
 # Subclass QMainWindow to customize your application's main window
 class MainWindow(QMainWindow):
@@ -34,6 +38,12 @@ class MainWindow(QMainWindow):
         self.sc = MplCanvas(self, width=5, height=4, dpi=100)
         self.sc.axes.plot([0,1,2,3,4], [10,1,20,3,40])        
         self.layout.addWidget(self.sc)
+        
+        self.pianoWidget = OctaveWidget()
+        Form = QtWidgets.QWidget()
+        ui = OctaveWidget()
+        ui.setupUi(Form)
+        self.layout.addWidget(ui)
         
         self.playButton = QPushButton("Play")
         self.playButton.clicked.connect(self.playButtonClicked)        
@@ -62,7 +72,6 @@ class MainWindow(QMainWindow):
         import simpleaudio as sa
         signal = self._signal_func(freq=self._frequency, amp=1.0, offset=0)        
         w = signal.make_wave(duration=1, framerate=44100)
-        w.write("test.wav")
-        wave_obj = sa.WaveObject.from_wave_file("test.wav")
-        play_obj = wave_obj.play()
+        audio_data = (w.ys * 32767).astype(np.int16)
+        play_obj = sa.play_buffer(audio_data, num_channels=1, bytes_per_sample=2, sample_rate=w.framerate)
         play_obj.wait_done()
