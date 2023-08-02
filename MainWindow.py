@@ -1,16 +1,8 @@
-import sys
 from thinkdsp import CosSignal, SinSignal, Audio, SquareSignal, TriangleSignal, SawtoothSignal
-
-from PyQt6.QtCore import QSize, Qt
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QSlider
-from matplotlib.backend_bases import FigureCanvasBase
-from matplotlib.backends.backend_qtagg import (
-    FigureCanvas, NavigationToolbar2QT as NavigationToolbar)
-from matplotlib.figure import Figure
 
 import numpy as np
 from matplotlib.backends.qt_compat import QtWidgets
-from widgets.PianoWidget import PianoWidget
 
 from widgets.frequency_slider import FrequencySlider
 from widgets.waveform_selector import WaveformSelector
@@ -21,6 +13,8 @@ from widgets.octave_widget import OctaveWidget
 class MainWindow(QMainWindow):
     def __init__(self):
         super().__init__()
+        self._signal_func = CosSignal
+        self._frequency = 440
         self.setWindowTitle("My App")        
         self._main = QtWidgets.QWidget()
         self.setCentralWidget(self._main)
@@ -38,21 +32,17 @@ class MainWindow(QMainWindow):
         self.sc = MplCanvas(self, width=5, height=4, dpi=100)
         self.sc.axes.plot([0,1,2,3,4], [10,1,20,3,40])        
         self.layout.addWidget(self.sc)
-        
-        self.pianoWidget = OctaveWidget()
-        Form = QtWidgets.QWidget()
-        ui = OctaveWidget()
-        ui.setupUi(Form)
-        self.layout.addWidget(ui)
-        
+
+
+
         self.playButton = QPushButton("Play")
         self.playButton.clicked.connect(self.playButtonClicked)        
         self.layout.addWidget(self.playButton)
-        
-        self.setFrequency(440)
-        self.setSignal(CosSignal)
+
         self.updateWaveCanvas()
-        
+        self.pianoWidget = OctaveWidget(parent=self._main)
+        self.layout.addWidget(self.pianoWidget)
+
     def setSignal(self, signal):
         self._signal_func = signal
     
@@ -65,8 +55,7 @@ class MainWindow(QMainWindow):
         wave = signal.make_wave(duration=1, framerate=10000)
         self.sc.axes.plot(wave.ts[:500], wave.ys[:500])
         self.sc.draw()
-            
-        
+
     def playButtonClicked(self):
         import wave
         import simpleaudio as sa

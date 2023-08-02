@@ -1,75 +1,65 @@
+from PyQt6 import QtGui, QtCore
 from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QStackedLayout
 from PyQt6.QtCore import Qt, QPoint, QRect
 
 
-class OctaveWidget(QWidget):   
-        
-    def setupUi(self, Form):    
-        Form.resize(400, 300)
-        self.initUI()
-        
-    def initUI(self):    
-        
-        self.C = QPushButton()
-        self.C.setGeometry(QRect(0, 0, 51, 291))
-        self.C.setStyleSheet("background-color:#FFFFFF")
-        self.C.setText("")
-        self.C.setObjectName("C")
-        self.D = QPushButton()
-        self.D.setGeometry(QRect(50, 0, 51, 291))
-        self.D.setStyleSheet("background-color:#FFFFFF")
-        self.D.setText("")
-        self.D.setObjectName("D")
-        self.E = QPushButton()
-        self.E.setGeometry(QRect(100, 0, 51, 291))
-        self.E.setStyleSheet("background-color:#FFFFFF")
-        self.E.setText("")
-        self.E.setObjectName("E")
-        self.F = QPushButton()
-        self.F.setGeometry(QRect(150, 0, 51, 291))
-        self.F.setStyleSheet("background-color:#FFFFFF")
-        self.F.setText("")
-        self.F.setObjectName("F")
-        self.G = QPushButton()
-        self.G.setGeometry(QRect(200, 0, 51, 291))
-        self.G.setStyleSheet("background-color:#FFFFFF")
-        self.G.setText("")
-        self.G.setObjectName("G")
-        self.A = QPushButton()
-        self.A.setGeometry(QRect(250, 0, 51, 291))
-        self.A.setStyleSheet("background-color:#FFFFFF")
-        self.A.setText("")
-        self.A.setObjectName("A")
-        self.B = QPushButton()
-        self.B.setGeometry(QRect(300, 0, 51, 291))
-        self.B.setStyleSheet("background-color:#FFFFFF")
-        self.B.setText("")
-        self.B.setObjectName("B")
-        self.CSharp = QPushButton()
-        self.CSharp.setGeometry(QRect(30, 0, 41, 161))
-        self.CSharp.setStyleSheet("background-color:#000000")
-        self.CSharp.setText("")
-        self.CSharp.setObjectName("CSharp")
-        self.DSharp = QPushButton()
-        self.DSharp.setGeometry(QRect(80, 0, 41, 161))
-        self.DSharp.setStyleSheet("background-color:#000000")
-        self.DSharp.setText("")
-        self.DSharp.setObjectName("DSharp")
-        self.FSharp = QPushButton()
-        self.FSharp.setGeometry(QRect(180, 0, 41, 161))
-        self.FSharp.setStyleSheet("background-color:#000000")
-        self.FSharp.setText("")
-        self.FSharp.setObjectName("FSharp")
-        self.GSharp = QPushButton()
-        self.GSharp.setGeometry(QRect(230, 0, 41, 161))
-        self.GSharp.setStyleSheet("background-color:#000000")
-        self.GSharp.setText("")
-        self.GSharp.setObjectName("GSharp")
-        self.ASharp = QPushButton()
-        self.ASharp.setGeometry(QRect(280, 0, 41, 161))
-        self.ASharp.setStyleSheet("background-color:#000000")
-        self.ASharp.setText("")
-        self.ASharp.setObjectName("ASharp")
-        
-        self.resize(7 * 50, 320)
-        #self.show()
+class KeyWidget(QWidget):
+
+    def __init__(self, name, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self.name = name
+
+    def clickHandler(self):
+        print(self.name)
+
+class OctaveWidget(QWidget):
+
+    clickedValue = QtCore.pyqtSignal(int)
+
+    def __init__(self, steps=5, *args, **kwargs):
+        super().__init__(*args, **kwargs)
+        self._white_keys = [KeyWidget("C"), KeyWidget("D"), KeyWidget("E"), KeyWidget("F"), KeyWidget("G"), KeyWidget("A"), KeyWidget("B")]
+        self._black_keys = [KeyWidget("C#"), KeyWidget("D#"), KeyWidget("F#"), KeyWidget("G#"), KeyWidget("A#")]
+
+    def sizeHint(self) -> QtCore.QSize:
+        return QtCore.QSize(100, 100)
+
+    def paintEvent(self, e):
+        painter = QtGui.QPainter(self)
+        brush = QtGui.QBrush()
+        brush.setStyle(Qt.BrushStyle.SolidPattern)
+        painter.fillRect(0, 0, painter.device().width(), painter.device().height(), QtGui.QColor(0, 0, 0))
+        key_width = int(painter.device().width() / 7)
+        key_height = painter.device().height()
+
+        black_key_height = int(key_height / 2)
+
+        # paints all white keys
+        for i, key in enumerate(self._white_keys):
+            brush.setColor(QtGui.QColor(255, 255, 255))
+            brush.setStyle(Qt.BrushStyle.SolidPattern)
+            painter.setBrush(brush)
+            r = QRect(i * key_width, 0, key_width - 2, key_height)
+            painter.drawRect(r)
+
+        # paints all black keys
+        gap = 0
+        for i, key in enumerate(self._black_keys):
+            brush.setColor(QtGui.QColor(40, 40, 40))
+            brush.setStyle(Qt.BrushStyle.SolidPattern)
+            painter.setBrush(brush)
+            if i == 2:
+                gap = 1
+            r = QRect(int(key_width/2)+gap*key_width+i*key_width, 0, key_width-2, black_key_height)
+            painter.drawRect(r)
+
+    def _calculate_clicked_value(self, e):
+        parent = self.parent()
+        vmin, vmax = parent.minimum(), parent.maximum()
+        d_height = self.size().height() + (self._padding * 2)
+        step_size = d_height / self.n_steps
+        click_y = e.y() - self._padding - step_size / 2
+
+        pc = (d_height - click_y) / d_height
+        value = vmin + pc * (vmax - vmin)
+        self.clickedValue.emit(value)
