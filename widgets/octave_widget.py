@@ -3,21 +3,40 @@ from PyQt6.QtWidgets import QApplication, QWidget, QPushButton, QStackedLayout
 from PyQt6.QtCore import Qt, QPoint, QRect
 
 
+NOTE_INDEX_MAPPING = {
+    'C': 0,
+    'C#': 1,
+    'Db': 1,
+    'D': 2,
+    'D#': 3,
+    'Eb': 3,
+    'E': 4,
+    'F': 5,
+    'F#': 6,
+    'Gb': 6,
+    'G': 7,
+    'G#': 8,
+    'Ab': 8,
+    'A': 9,
+    'A#': 10,
+    'Bb': 10,
+    'B': 11
+}
+
+
 class KeyWidget(QWidget):
 
     def __init__(self, name, *args, **kwargs):
         super().__init__(*args, **kwargs)
         self.name = name
 
-    def clickHandler(self):
-        print(self.name)
-
 class OctaveWidget(QWidget):
 
-    clickedValue = QtCore.pyqtSignal(int)
+    keyPressed = QtCore.pyqtSignal(int)
 
-    def __init__(self, steps=5, *args, **kwargs):
+    def __init__(self, octave=4, *args, **kwargs):
         super().__init__(*args, **kwargs)
+        self._octave = octave
         self._white_keys = [KeyWidget("C"), KeyWidget("D"), KeyWidget("E"), KeyWidget("F"), KeyWidget("G"), KeyWidget("A"), KeyWidget("B")]
         self._black_keys = [KeyWidget("C#"), KeyWidget("D#"), KeyWidget("F#"), KeyWidget("G#"), KeyWidget("A#")]
 
@@ -41,6 +60,7 @@ class OctaveWidget(QWidget):
             painter.setBrush(brush)
             r = QRect(i * key_width, 0, key_width - 2, key_height)
             painter.drawRect(r)
+            key.setGeometry(r)
 
         # paints all black keys
         gap = 0
@@ -52,14 +72,18 @@ class OctaveWidget(QWidget):
                 gap = 1
             r = QRect(int(key_width/2)+gap*key_width+i*key_width, 0, key_width-2, black_key_height)
             painter.drawRect(r)
+            key.setGeometry(r)
 
-    def _calculate_clicked_value(self, e):
-        parent = self.parent()
-        vmin, vmax = parent.minimum(), parent.maximum()
-        d_height = self.size().height() + (self._padding * 2)
-        step_size = d_height / self.n_steps
-        click_y = e.y() - self._padding - step_size / 2
+    def mousePressEvent(self, event):
+        for key in self._black_keys+self._white_keys:
+            if key.geometry().contains(event.pos()):
+                print(f"Clicked on rect: {key.name}")
+                # emit signal with value
+                f = self.get_piano_key_frequency(self._octave, NOTE_INDEX_MAPPING[key.name])
+                self.keyPressed.emit(f)
+                print(f"Emitted freq: {f}")
+                break
 
-        pc = (d_height - click_y) / d_height
-        value = vmin + pc * (vmax - vmin)
-        self.clickedValue.emit(value)
+    def get_piano_key_frequency(self, i_octave, key_number):
+        return 2 ** (((12 * i_octave + key_number) - 49) / 12) * 440
+

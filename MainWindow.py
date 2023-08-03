@@ -42,6 +42,10 @@ class MainWindow(QMainWindow):
         self.updateWaveCanvas()
         self.pianoWidget = OctaveWidget(parent=self._main)
         self.layout.addWidget(self.pianoWidget)
+        self.pianoWidget.keyPressed.connect(self.pianoKeyPressed)
+
+    def pianoKeyPressed(self, freq):
+        print(str(freq))
 
     def setSignal(self, signal):
         self._signal_func = signal
