@@ -1,6 +1,6 @@
 from thinkdsp import CosSignal, SinSignal, Audio, SquareSignal, TriangleSignal, SawtoothSignal
 from PyQt6.QtWidgets import QApplication, QMainWindow, QPushButton, QSlider
-
+import simpleaudio as sa
 import numpy as np
 from matplotlib.backends.qt_compat import QtWidgets
 
@@ -33,8 +33,6 @@ class MainWindow(QMainWindow):
         self.sc.axes.plot([0,1,2,3,4], [10,1,20,3,40])        
         self.layout.addWidget(self.sc)
 
-
-
         self.playButton = QPushButton("Play")
         self.playButton.clicked.connect(self.playButtonClicked)        
         self.layout.addWidget(self.playButton)
@@ -45,7 +43,9 @@ class MainWindow(QMainWindow):
         self.pianoWidget.keyPressed.connect(self.pianoKeyPressed)
 
     def pianoKeyPressed(self, freq):
+        self.setFrequency(freq)
         print(str(freq))
+        self.playTone()
 
     def setSignal(self, signal):
         self._signal_func = signal
@@ -61,8 +61,9 @@ class MainWindow(QMainWindow):
         self.sc.draw()
 
     def playButtonClicked(self):
-        import wave
-        import simpleaudio as sa
+        self.playTone()
+
+    def playTone(self):
         signal = self._signal_func(freq=self._frequency, amp=1.0, offset=0)        
         w = signal.make_wave(duration=1, framerate=44100)
         audio_data = (w.ys * 32767).astype(np.int16)

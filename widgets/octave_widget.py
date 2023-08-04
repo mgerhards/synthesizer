@@ -30,9 +30,10 @@ class KeyWidget(QWidget):
         super().__init__(*args, **kwargs)
         self.name = name
 
+
 class OctaveWidget(QWidget):
 
-    keyPressed = QtCore.pyqtSignal(int)
+    keyPressed = QtCore.pyqtSignal(float)
 
     def __init__(self, octave=4, *args, **kwargs):
         super().__init__(*args, **kwargs)
@@ -80,8 +81,8 @@ class OctaveWidget(QWidget):
                 print(f"Clicked on rect: {key.name}")
                 # emit signal with value
                 f = self.get_piano_key_frequency(self._octave, NOTE_INDEX_MAPPING[key.name])
-                self.keyPressed.emit(f)
-                print(f"Emitted freq: {f}")
+                self.keyPressed.emit(float(f))
+                #print(f"Emitted freq: {f}")
                 break
 
     def get_piano_key_frequency(self, i_octave, key_number):
