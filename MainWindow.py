@@ -29,9 +29,17 @@ class MainWindow(QMainWindow):
         self.layout.addWidget(self.slider) 
         
         # Add area for plotting signal with matplotlib
-        self.sc = MplCanvas(self, width=5, height=4, dpi=100)
-        self.sc.axes.plot([0,1,2,3,4], [10,1,20,3,40])        
-        self.layout.addWidget(self.sc)
+        self.sc = MplCanvas(self, width=3, height=2, dpi=150)
+        self.fc = MplCanvas(self, width=3, height=2, dpi=150)
+        self.graphics_layout = QtWidgets.QHBoxLayout()
+        self.graphics_layout.addWidget(self.sc)
+        self.graphics_layout.addWidget(self.fc)
+
+        signal_widget = QtWidgets.QWidget()
+        signal_widget.setLayout(self.graphics_layout)
+
+        self.layout.addWidget(signal_widget)
+
 
         self.playButton = QPushButton("Play")
         self.playButton.clicked.connect(self.playButtonClicked)        
@@ -56,9 +64,18 @@ class MainWindow(QMainWindow):
     def updateWaveCanvas(self):
         self.sc.axes.clear()
         signal = self._signal_func(freq=self._frequency, amp=1.0, offset=0)        
-        wave = signal.make_wave(duration=1, framerate=10000)
+        wave = signal.make_wave(duration=0.25, framerate=10000)
         self.sc.axes.plot(wave.ts[:500], wave.ys[:500])
         self.sc.draw()
+        self.updateSpectrumCanvas()
+
+    def updateSpectrumCanvas(self):
+        self.fc.axes.clear()
+        signal = self._signal_func(freq=self._frequency, amp=1.0, offset=0)
+        wave = signal.make_wave(duration=0.25, framerate=10000)
+        spectrum = wave.make_spectrum()
+        self.fc.axes.plot(spectrum.fs[:500], spectrum.amps[:500])
+        self.fc.draw()
 
     def playButtonClicked(self):
         self.playTone()
