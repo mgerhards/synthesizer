@@ -57,7 +57,7 @@ class FrequencySlider(QWidget):
         self.slider.setValue(value)
 
     def updateLabels(self):
-        self.main_window.setFrequency(self.slider.value())
+        self.main_window.setPitch(self.slider.value())
         self.main_window.updateWaveCanvas()
         self.frequency_value_label.setText(str(self.slider.value()))
         self.min_label.setText(str(self.slider.minimum()))
