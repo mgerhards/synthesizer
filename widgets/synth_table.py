@@ -13,8 +13,6 @@ class SignalSelector(QtWidgets.QWidget):
     def __init__(self, i, main_window=None, parent=None):
         self._main_window = main_window
         super().__init__(parent=parent)
-        self.i = i
-        self.layout = QtWidgets.QVBoxLayout(self)
         self._pitch = 440
         self._signal_func = CosSignal
         # add Label
