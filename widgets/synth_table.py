@@ -1,6 +1,7 @@
 ## a widget that holds the buttons for selecting a waveform, and a slider for selecting the frequency and the canvas for plotting the signal and spectrum
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import Qt
+from PyQt6.QtWidgets import QVBoxLayout
 
 from widgets.frequency_slider import FrequencySlider
 from widgets.waveform_selector import WaveformSelector
@@ -12,9 +13,11 @@ class SignalSelector(QtWidgets.QWidget):
 
     def __init__(self, i, main_window=None, parent=None):
         self._main_window = main_window
+        self.i = i
         super().__init__(parent=parent)
         self._pitch = 440
         self._signal_func = CosSignal
+        self.layout = QVBoxLayout()
         # add Label
         self.label = QtWidgets.QLabel("Signal " + str(self.i))
         # set alignment to center

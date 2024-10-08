@@ -1502,7 +1502,8 @@ class TriangleSignal(Sinusoid):
         ys = normalize(unbias(ys), self.amp)
         return ys
 
-from scipy.integrate import cumtrapz
+#from scipy.integrate import cumtrapz
+from scipy.integrate import cumulative_trapezoid as cumtrapz
 
 class Chirp(Signal):
     """Represents a signal with variable frequency."""
